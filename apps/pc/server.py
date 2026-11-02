@@ -85,7 +85,11 @@ def install_studio(app, api_key, pairing_code, source="pexels"):
         if len(recent) >= 5:
             return JSONResponse({"message": "Wait one minute before trying again"}, 429)
         attempts[client] = recent + [now]
-        if int(request.headers.get("content-length", "0") or 0) > 1024:
+        try:
+            body_length = int(request.headers.get("content-length", "0") or 0)
+        except ValueError:
+            return JSONResponse({"message": "Invalid request length"}, 400)
+        if body_length > 1024:
             return JSONResponse({"message": "Pairing request too large"}, 413)
         try:
             body = await request.body()

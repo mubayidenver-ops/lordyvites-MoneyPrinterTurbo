@@ -61,6 +61,12 @@ jobs:
       - name: Build Android APK
         working-directory: apps/android
         run: gradle assembleRelease lintRelease --no-daemon
+      - name: Verify release signing and source match
+        if: hashFiles('apps/releases/Lordyvites-Studio-Android.apk') != ''
+        run: |
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)
+          "$signer" verify --verbose --print-certs apps/releases/Lordyvites-Studio-Android.apk
+          python3 apps/android/verify_apk.py apps/android/app/build/outputs/apk/release/app-release-unsigned.apk apps/releases/Lordyvites-Studio-Android.apk
       - uses: actions/upload-artifact@v4
         with:
           name: android-unsigned

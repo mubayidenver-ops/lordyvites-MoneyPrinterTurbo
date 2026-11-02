@@ -53,6 +53,11 @@ class PairingTests(unittest.TestCase):
         restarted.cookies.update(self.client.cookies)
         self.assertEqual(restarted.get("/studio-status").status_code, 401)
 
+    def test_invalid_pairing_payload_is_handled(self):
+        self.assertEqual(self.client.post("/pair", content="not JSON").status_code, 400)
+        self.assertEqual(self.client.post("/pair", content="{}", headers={"content-length": "bad"}).status_code, 400)
+        self.assertEqual(self.client.post("/pair", content="x" * 2048).status_code, 413)
+
 
 if __name__ == "__main__":
     unittest.main()
